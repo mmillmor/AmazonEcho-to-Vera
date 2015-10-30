@@ -1,0 +1,371 @@
+{
+  "header": {
+    "namespace": "Discovery",
+    "name": "DiscoverAppliancesResponse",
+    "payloadVersion": "1"
+  },
+  "payload": {
+    "discoveredAppliances": [
+      {
+        "applianceId": "202",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Appliance Module 10",
+        "friendlyDescription": "Switch Appliance Module 10 in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "191",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Appliance Module 8",
+        "friendlyDescription": "Switch Appliance Module 8 in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "56",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Balcony",
+        "friendlyDescription": "Switch Balcony in Living Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "49",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Bedroom 1",
+        "friendlyDescription": "Dimmable Switch Bedroom 1 in Bedroom",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "52",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Bedroom 2",
+        "friendlyDescription": "Dimmable Switch Bedroom 2 in Bedroom",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "198",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Bike Charger",
+        "friendlyDescription": "Switch Bike Charger in Unknown Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "200",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Cover Closed",
+        "friendlyDescription": "Switch Cover Closed in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "47",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Dan Ceiling",
+        "friendlyDescription": "Dimmable Switch Dan Ceiling in Dan",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "48",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Dan Spots",
+        "friendlyDescription": "Switch Dan Spots in Dan",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "16",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Hall",
+        "friendlyDescription": "Switch Hall in Hall",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "117",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Kitchen Left",
+        "friendlyDescription": "Switch Kitchen Left in Kitchen",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "122",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Kitchen Right",
+        "friendlyDescription": "Switch Kitchen Right in Kitchen",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "83",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Kitchen wall",
+        "friendlyDescription": "Switch Kitchen wall in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "85",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "KW2",
+        "friendlyDescription": "Switch KW2 in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "27",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Lamp",
+        "friendlyDescription": "Switch Lamp in Hall",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "18",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Landing",
+        "friendlyDescription": "Switch Landing in Hall",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "35",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Living Room Lamp",
+        "friendlyDescription": "Switch Living Room Lamp in Living Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "192",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Living Room Outside",
+        "friendlyDescription": "Switch Living Room Outside in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "109",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Living Room Spots",
+        "friendlyDescription": "Dimmable Switch Living Room Spots in Living Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "112",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Living Room Walls",
+        "friendlyDescription": "Switch Living Room Walls in Living Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "136",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Martin Bed",
+        "friendlyDescription": "Switch Martin Bed in Bedroom",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "119",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Pelmet",
+        "friendlyDescription": "Switch Pelmet in Kitchen",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "20",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Playroom Ceiling",
+        "friendlyDescription": "Switch Playroom Ceiling in Playroom",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "22",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Playroom Walls",
+        "friendlyDescription": "Switch Playroom Walls in Playroom",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "80",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Pool Close",
+        "friendlyDescription": "Switch Pool Close in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "190",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Pool Lights",
+        "friendlyDescription": "Switch Pool Lights in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "82",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Pool Open",
+        "friendlyDescription": "Switch Pool Open in Outside",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "60",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Skylight Close",
+        "friendlyDescription": "Switch Skylight Close in Landing",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "62",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Skylight Open",
+        "friendlyDescription": "Switch Skylight Open in Landing",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "111",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Stairs",
+        "friendlyDescription": "Dimmable Switch Stairs in Living Room",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "7",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Study Ceiling",
+        "friendlyDescription": "Switch Study Ceiling in Study",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "12",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Study Ceiling 2",
+        "friendlyDescription": "Switch Study Ceiling 2 in Study",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "10",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Study Walls",
+        "friendlyDescription": "Switch Study Walls in Study",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "9",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Study Walls 2",
+        "friendlyDescription": "Switch Study Walls 2 in Study",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "44",
+        "manufacturerName": "vera",
+        "modelName": "vera Dimmable Switch",
+        "version": "1",
+        "friendlyName": "Will Ceiling",
+        "friendlyDescription": "Dimmable Switch Will Ceiling in William",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "applianceId": "46",
+        "manufacturerName": "vera",
+        "modelName": "vera Switch",
+        "version": "1",
+        "friendlyName": "Will Spots",
+        "friendlyDescription": "Switch Will Spots in William",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      }
+    ]
+  }
+}
