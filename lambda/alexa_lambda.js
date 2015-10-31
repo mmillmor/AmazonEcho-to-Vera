@@ -17,7 +17,7 @@ var generateControlError = generateControlError;
 exports.handler = function(event, context) {
 
     // Warning! Logging this in production might be a security problem.
-  //  log('Input', event);
+ //   log('Input', event);
 
     switch (event.header.namespace) {
 
@@ -80,7 +80,6 @@ function handleDiscovery(event, context) {
         if(typeof(userDetails.username)!=="undefined"){
 
     var appliances = [];
-
     getVeraSession(userDetails.username,userDetails.password,function(ServerRelay,RelaySessionToken,PK_Device){
         getStatuses(ServerRelay,PK_Device,RelaySessionToken,function(statusText){
           var Status = JSON.parse(statusText);
@@ -157,7 +156,7 @@ function handleDiscovery(event, context) {
             modelName:"vera scene",
             version: "1",
             applianceId: "S"+scene.id.toString(),
-            friendlyName: "Scene "+scene.name,
+            friendlyName: scene.name + " Scene",
             isReachable: true,
             additionalApplianceDetails: {}
             };
@@ -377,7 +376,6 @@ var options = {
 https.get(options, function(response) {
         var body = '';
         response.on('data', function(d) { body += d;});
-
         response.on('end', function() {
         var result = JSON.parse(body);
 		var AuthToken  		= result.Identity;
@@ -519,7 +517,6 @@ function runScene( ServerRelay,PK_Device,RelaySessionToken, sceneId,cbfunc )
 function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc )
 {
 
-    http://ip_address:3480/data_request?id=variableget&DeviceNum=6&serviceId=urn:micasaverde-com:serviceId:DoorLock1&Variable=Status
 	var options = {
 	hostname: ServerRelay,
 	port: 443,
@@ -551,10 +548,7 @@ function getLoginDetails( accessToken, cbfunc )
 	https.get(options, function(response) {
         var body = '';
         response.on('data', function(d) {body += d;});
-
-        response.on('end', function() {
-	      cbfunc(body);
-	    });
+        response.on('end', function() {cbfunc(body);});
 
 	    response.on("error",function(e){log("Got error: " + e.message); });
 	});

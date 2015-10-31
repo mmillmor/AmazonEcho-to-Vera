@@ -1,0 +1,14 @@
+{
+  "header": {
+    "namespace": "Control",
+    "name": "SwitchOnOffRequest",
+    "payloadVersion": "1"
+  },
+  "payload": {
+    "accessToken": "enterAccessToken",
+    "switchControlAction": "TURN_ON",
+    "appliance": {
+      "applianceId": "1"
+    }
+  }
+}

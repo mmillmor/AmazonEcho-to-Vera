@@ -1,0 +1,10 @@
+{
+  "header": {
+    "namespace": "Discovery",
+    "name": "DiscoverAppliancesRequest",
+    "payloadVersion": "1"
+  },
+  "payload": {
+    "accessToken": "enterAccessToken"
+  }
+}

@@ -137,16 +137,6 @@
         "additionalApplianceDetails": {}
       },
       {
-        "applianceId": "85",
-        "manufacturerName": "vera",
-        "modelName": "vera Switch",
-        "version": "1",
-        "friendlyName": "KW2",
-        "friendlyDescription": "Switch KW2 in Outside",
-        "isReachable": true,
-        "additionalApplianceDetails": {}
-      },
-      {
         "applianceId": "27",
         "manufacturerName": "vera",
         "modelName": "vera Switch",
@@ -317,32 +307,12 @@
         "additionalApplianceDetails": {}
       },
       {
-        "applianceId": "12",
-        "manufacturerName": "vera",
-        "modelName": "vera Switch",
-        "version": "1",
-        "friendlyName": "Study Ceiling 2",
-        "friendlyDescription": "Switch Study Ceiling 2 in Study",
-        "isReachable": true,
-        "additionalApplianceDetails": {}
-      },
-      {
         "applianceId": "10",
         "manufacturerName": "vera",
         "modelName": "vera Switch",
         "version": "1",
         "friendlyName": "Study Walls",
         "friendlyDescription": "Switch Study Walls in Study",
-        "isReachable": true,
-        "additionalApplianceDetails": {}
-      },
-      {
-        "applianceId": "9",
-        "manufacturerName": "vera",
-        "modelName": "vera Switch",
-        "version": "1",
-        "friendlyName": "Study Walls 2",
-        "friendlyDescription": "Switch Study Walls 2 in Study",
         "isReachable": true,
         "additionalApplianceDetails": {}
       },
@@ -363,6 +333,132 @@
         "version": "1",
         "friendlyName": "Will Spots",
         "friendlyDescription": "Switch Will Spots in William",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S11",
+        "friendlyName": "Away Bed Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S12",
+        "friendlyName": "Away Evening Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S27",
+        "friendlyName": "Close Pool Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S13",
+        "friendlyName": "Landing Morning Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S7",
+        "friendlyName": "Morning Greeting Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S26",
+        "friendlyName": "Open Pool Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S4",
+        "friendlyName": "Pool colour Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S20",
+        "friendlyName": "Running Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S16",
+        "friendlyName": "School Time Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S23",
+        "friendlyName": "Set Away Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S24",
+        "friendlyName": "Set Home Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S19",
+        "friendlyName": "Sunrise Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S5",
+        "friendlyName": "Watch Movie Scene",
+        "isReachable": true,
+        "additionalApplianceDetails": {}
+      },
+      {
+        "manufacturerName": "vera",
+        "modelName": "vera scene",
+        "version": "1",
+        "applianceId": "S6",
+        "friendlyName": "Will Bedtime Scene",
         "isReachable": true,
         "additionalApplianceDetails": {}
       }

@@ -1,0 +1,10 @@
+{
+  "header": {
+    "namespace": "Control",
+    "name": "SwitchOnOffResponse",
+    "payloadVersion": "1"
+  },
+  "payload": {
+    "success": true
+  }
+}
