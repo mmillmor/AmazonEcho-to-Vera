@@ -539,8 +539,9 @@ function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,c
 
 function getLoginDetails( accessToken, cbfunc )
 {
+	// edit the following line to put your server name
 	var options = {
-	hostname: "www.milliesoft.co.uk",
+	hostname: "enter your host name",
 	port: 443,
 	path: '/auth/get_user_details.php?access_token='+accessToken,
 	};
