@@ -42,9 +42,13 @@ INSERT INTO oauth_clients (client_id, client_secret, scope,redirect_uri) VALUES 
 8. On the left hand side, type in a scope of ```basic``` and press Authorize APIs. If your OAuth2 server is set up correctly, it will redirect you to a login page to enter your Vera access details. Log in with your Vera remote user account.
 9. This will send you back to Google with an access authorization code. Click on Exchange authorization code for tokens - and be quick, the code is only valid for 30 seconds
 10. Now you can test the URL which gets the user details. In the request box, enter the url for get_user_details, e.g.  ```https://myserver.com/auth/get_user_details.php```. Press Send the request, and you should get your username and a hashed version of your password.
-11. 
 
- 
+### Setting up the OAuth2 server - option 2, use Login With Amazon
+
+If you don't want to deploy your own OAuth server, you can instead use Login With Amazon. To register for that, create an account at Login With Amazon as described at https://developer.amazon.com/public/community/post/TxNL8HYBBE7YTE/Tips-for-Using-Login-with-Amazon-in-Alexa-Connected-Home-CoHo-Skills
+
+Note, if you use Login With Amazon, your credentials won't be stored on the OAuth server, so they have to be hard coded in the lambda file. Use the file alexa_lambda_amazon_oauth.js instead, entering your username and encoded password in there. You can use the file generate_sha1_password.html to generate your encoded password.
+
 ### Testing in Amazon
 
 Now that you have a working OAuth2 server, you can test in Amazon. 
