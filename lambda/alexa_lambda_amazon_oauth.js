@@ -340,11 +340,11 @@ function handleControl(event, context) {
 
 
 function getVeraSession(username,password,cbfunc){
-		var authd11Server = "vera-us-oem-authd11.mios.com";
         getAuthToken( username,password, function ( AuthToken, AuthSigToken, Server_Account ) {
             var AuthTokenDecoded = new Buffer(AuthToken, 'base64');
             var AuthTokenJson=JSON.parse(AuthTokenDecoded);
             var PK_Account = AuthTokenJson.PK_Account;
+  		    var authd11Server = "vera-us-oem-authd11.mios.com";
 		    getSessionToken( authd11Server, AuthToken, AuthSigToken, function(AuthSessionToken) {
 			    getDeviceList(Server_Account,PK_Account,AuthSessionToken,function(deviceTable) {
 					var Devices = JSON.parse(deviceTable);
@@ -368,7 +368,7 @@ function getAuthToken( user, pwd, cbfunc )
 {
 
 var options = {
-  hostname: 'vera-us-oem-authd11.mios.com',
+  hostname: 'vera-us-oem-autha11.mios.com',
   path: '/autha/auth/username/'+user+'?SHA1Password='+pwd+'&PK_Oem=1',
   port:443
 };
