@@ -19,6 +19,12 @@ Note, the Amazon Echo requires OAuth2 to connect to the target device. Since the
 
 To use Login with Amazon, create a free account as described at https://developer.amazon.com/public/community/post/TxNL8HYBBE7YTE/Tips-for-Using-Login-with-Amazon-in-Alexa-Connected-Home-CoHo-Skills
 
+You will need to tell Amazon your client ID and client Secret, your Lambda function identifier, your Amazon account ID, and the following;
+
+The OAuth Scope: profile:user_id
+The OAuth Authorization URL: https://www.amazon.com/ap/oa 
+The OAuth token URL:  https://api.amazon.com/auth/o2/token
+
 Note, if you use Login With Amazon, your credentials won't be stored on the OAuth server, so they have to be hard coded in the lambda file. Use the file alexa_lambda_amazon_oauth.js, entering your username and *encoded* password in there. You can use the file generate_sha1_password.html to generate your encoded password - it will run the md5 function on a combination of your username and password, and it does it all in the browser so it isn't sending your password anywhere..
 
 #### Testing in Amazon (Login with Amazon)
