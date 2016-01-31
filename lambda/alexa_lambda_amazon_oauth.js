@@ -11,7 +11,6 @@ var log = log;
 var generateControlError = generateControlError;
 var username="{enter your username}";
 var password="{enter your encoded password}";
-var userDetailsText="{\"username\":\""+username+"\",\"password\":\""+password+"\"}";
 /**
  * Main entry point.
  * Incoming events from Alexa Lighting APIs are processed via this method.
@@ -75,16 +74,11 @@ function handleDiscovery(event, context) {
         payloadVersion: '1'
     };
 
-    var accessToken = event.payload.accessToken.trim();
-    console.log("discovery for accessToken "+accessToken);
- //   getLoginDetails(accessToken,function(userDetailsText){
-        var userDetails=JSON.parse(userDetailsText);
-        if(typeof(userDetails.username)!=="undefined"){
 
     var appliances = [];
-    getVeraSession(userDetails.username,userDetails.password,function(ServerRelay,RelaySessionToken,PK_Device){
+    getVeraSession(username,password,function(ServerRelay,RelaySessionToken,PK_Device){
         getStatuses(ServerRelay,PK_Device,RelaySessionToken,function(statusText){
-          var Status = JSON.parse(statusText);
+          var Status = parseJson(statusText,"status");
           var allDevices=Status.devices;
           var allRooms=Status.rooms;
           var allScenes=Status.scenes;
@@ -186,22 +180,6 @@ function handleDiscovery(event, context) {
 
         });
     });
-        } else {
-
-          var payload = {
-            exception: {
-              code: 'INVALID_ACCESS_TOKEN',
-              description: 'Could not find user'
-            }
-          };
-
-          var result = {
-            header: headers,
-            payload: payload
-          };
-          context.fail(result);
-        }
-  //  }); // getLoginDetails
 
 }
 
@@ -225,11 +203,7 @@ function handleControl(event, context) {
                 };
     var accessToken = event.payload.accessToken.trim();
 
-/*    getLoginDetails(accessToken,function(userDetailsText){*/
-        var userDetails=JSON.parse(userDetailsText);
-        if(typeof(userDetails.username)!=="undefined"){
-
-    getVeraSession(userDetails.username,userDetails.password,function(ServerRelay,RelaySessionToken,PK_Device){
+    getVeraSession(username,password,function(ServerRelay,RelaySessionToken,PK_Device){
 
 
     if (event.header.namespace !== 'Control' || !(event.header.name == 'SwitchOnOffRequest' ||event.header.name == 'AdjustNumericalSettingRequest') ) {
@@ -282,8 +256,6 @@ function handleControl(event, context) {
                     payload: payloads
                 };
 
-                // Warning! Logging this with production data might be a security problem.
-              //  log('Done with result', JSON.stringify(result));
                 context.succeed(result);
                 }
 
@@ -330,10 +302,6 @@ function handleControl(event, context) {
         }
 
     });
-} else {
-            context.fail(generateControlError(event.header.name.replace("Request","Response"), 'INVALID_ACCESS_TOKEN', 'Could not find user'));
-}
-//}); //getLoginDetails
 
 }
 
@@ -342,16 +310,16 @@ function handleControl(event, context) {
 function getVeraSession(username,password,cbfunc){
         getAuthToken( username,password, function ( AuthToken, AuthSigToken, Server_Account ) {
             var AuthTokenDecoded = new Buffer(AuthToken, 'base64');
-            var AuthTokenJson=JSON.parse(AuthTokenDecoded);
+            var AuthTokenJson=parseJson(AuthTokenDecoded,"auth");
             var PK_Account = AuthTokenJson.PK_Account;
 		    getSessionToken( Server_Account, AuthToken, AuthSigToken, function(AuthSessionToken) {
 			    getDeviceList(Server_Account,PK_Account,AuthSessionToken,function(deviceTable) {
-					var Devices = JSON.parse(deviceTable);
+					var Devices = parseJson(deviceTable,"device");
 					var PK_Device=Devices.Devices[0].PK_Device;
 					var Server_Device=Devices.Devices[0].Server_Device;
 					getSessionToken(Server_Device, AuthToken, AuthSigToken, function(ServerDeviceSessionToken) {
 				        getServerRelay(Server_Device,PK_Device,ServerDeviceSessionToken,function(sessionRelayText){
-					        var Relays = JSON.parse(sessionRelayText);
+					        var Relays = parseJson(sessionRelayText,"relays");
 					        var ServerRelay=Relays.Server_Relay;
 					        getSessionToken(ServerRelay, AuthToken, AuthSigToken, function(RelaySessionToken) {
     					        cbfunc(ServerRelay,RelaySessionToken,PK_Device);
@@ -372,12 +340,11 @@ var options = {
   port:443
 };
 
-//console.log("https://"+options["hostname"]+options["path"]);
 https.get(options, function(response) {
         var body = '';
         response.on('data', function(d) { body += d;});
         response.on('end', function() {
-        var result = JSON.parse(body);
+        var result = parseJson(body,"auth");
 		var AuthToken  		= result.Identity;
 		var AuthSigToken    = result.IdentitySignature;
 		var Server_Account	= result.Server_Account;
@@ -391,17 +358,15 @@ https.get(options, function(response) {
 function getSessionToken(server, AuthToken, AuthSigToken, cbfunc )
 {
     var options = {
-    hostname: server,
-    port: 443,
-    path: '/info/session/token',
-    headers: {"MMSAuth":AuthToken,"MMSAuthSig":AuthSigToken}
-};
-
-
-https.get(options, function(response) {
+      hostname: server,
+      port: 443,
+      path: '/info/session/token',
+      headers: {"MMSAuth":AuthToken,"MMSAuthSig":AuthSigToken}
+    };
+    https.get(options, function(response) {
         var SessionToken = '';
         response.on('data', function(d) {SessionToken += d;});
-        response.on('end', function() { cbfunc(SessionToken);});
+        response.on('end', function() {cbfunc(SessionToken);});
         response.on("error",function(e){log("Got error: " + e.message);});
     });
 }
@@ -537,27 +502,19 @@ function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,c
 }
 
 
-function getLoginDetails( accessToken, cbfunc )
-{
-	var options = {
-	hostname: "www.milliesoft.co.uk",
-	port: 443,
-	path: '/auth/get_user_details.php?access_token='+accessToken,
-	};
-
-	https.get(options, function(response) {
-        var body = '';
-        response.on('data', function(d) {body += d;});
-        response.on('end', function() {cbfunc(body);});
-
-	    response.on("error",function(e){log("Got error: " + e.message); });
-	});
-
-}
 
 /**
  * Utility functions.
  */
+function parseJson(jsonMessage,requestType){
+    try {
+        return JSON.parse(jsonMessage);
+    } catch (ex)
+    {
+    log("Parsing Error","error parsing JSON message of type "+requestType+": "+jsonMessage);
+    }
+}
+
 function log(title, msg) {
     console.log('*************** ' + title + ' *************');
     console.log(msg);
