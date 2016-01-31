@@ -11,6 +11,9 @@ var log = log;
 var generateControlError = generateControlError;
 var username="{enter your username}";
 var password="{enter your encoded password}";
+
+var PK_Device="";  // if you want to use a specific device, enter it's device ID here
+var Server_Device="";
 /**
  * Main entry point.
  * Incoming events from Alexa Lighting APIs are processed via this method.
@@ -315,8 +318,19 @@ function getVeraSession(username,password,cbfunc){
 		    getSessionToken( Server_Account, AuthToken, AuthSigToken, function(AuthSessionToken) {
 			    getDeviceList(Server_Account,PK_Account,AuthSessionToken,function(deviceTable) {
 					var Devices = parseJson(deviceTable,"device");
-					var PK_Device=Devices.Devices[0].PK_Device;
-					var Server_Device=Devices.Devices[0].Server_Device;
+					if(PK_Device==""){
+					  PK_Device=Devices.Devices[0].PK_Device;
+					  Server_Device=Devices.Devices[0].Server_Device;
+					} else {
+					  var deviceArrayLength = Devices.Devices.length;
+                      for (var i = 0; i < deviceArrayLength; i++) {
+                        if(Devices.Devices[i].PK_Device==PK_Device){
+                          Server_Device=Devices.Devices[i].Server_Device;
+                          break;
+                        }
+                      }
+					}
+
 					getSessionToken(Server_Device, AuthToken, AuthSigToken, function(ServerDeviceSessionToken) {
 				        getServerRelay(Server_Device,PK_Device,ServerDeviceSessionToken,function(sessionRelayText){
 					        var Relays = parseJson(sessionRelayText,"relays");
