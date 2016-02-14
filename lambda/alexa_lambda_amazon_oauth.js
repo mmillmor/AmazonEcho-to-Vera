@@ -5,23 +5,18 @@
     or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 */
 
+var username="{enter your username}";
+var password="{enter your encoded password}";
+
 var https = require('https');
 var http = require('http');
 var log = log;
 var generateControlError = generateControlError;
-var username="{enter your username}";
-var password="{enter your encoded password}";
-
-var PK_Device="";  // if you want to use a specific device, enter it's device ID here
-var Server_Device="";
 /**
  * Main entry point.
  * Incoming events from Alexa Lighting APIs are processed via this method.
  */
 exports.handler = function(event, context) {
-
-    // Warning! Logging this in production might be a security problem.
- //   log('Input', event);
 
     switch (event.header.namespace) {
 
@@ -99,6 +94,7 @@ function handleDiscovery(event, context) {
                 }
 
             var deviceCategory="Unknown type of device";
+            var applicanceId=device.id.toString();
             switch (device.category){
                 case 2:
                     deviceCategory="Dimmable Switch";
@@ -111,7 +107,8 @@ function handleDiscovery(event, context) {
                     continue deviceLoop;
                 case 5:
                     deviceCategory="Thermostat";
-                    continue deviceLoop;
+                    applicanceId="T"+device.id.toString();
+                    break;
                 case 6:
                     deviceCategory="Camera";
                     continue deviceLoop;
@@ -132,7 +129,7 @@ function handleDiscovery(event, context) {
             }
 
             var applianceDiscovered = {
-            applianceId: device.id.toString(),
+            applianceId: applicanceId,
             manufacturerName:"vera",
             modelName:"vera "+deviceCategory,
             version: "1",
@@ -204,10 +201,8 @@ function handleControl(event, context) {
                     header: headers,
                     payload: payloads
                 };
-    var accessToken = event.payload.accessToken.trim();
 
     getVeraSession(username,password,function(ServerRelay,RelaySessionToken,PK_Device){
-
 
     if (event.header.namespace !== 'Control' || !(event.header.name == 'SwitchOnOffRequest' ||event.header.name == 'AdjustNumericalSettingRequest') ) {
         context.fail(generateControlError(event.header.name.replace("Request","Response"), 'UNSUPPORTED_OPERATION', 'Unrecognized operation'));
@@ -215,30 +210,28 @@ function handleControl(event, context) {
 
         var applianceId = event.payload.appliance.applianceId;
 
-        if (typeof applianceId !== "string" || typeof accessToken !== "string") {
-            log("event payload is invalid");
+        if (typeof applianceId !== "string" ) {
+            log("event payload is invalid",event);
             context.fail(generateControlError(event.header.name.replace("Request","Response"), 'UNEXPECTED_INFORMATION_RECEIVED', 'Input is invalid'));
         }
 
     if (event.header.name === 'SwitchOnOffRequest') {
 
-        /**
-         * Make a remote call to execute the action based on accessToken and the applianceId and the switchControlAction
-         * Some other examples of checks:
-         *	validate the appliance is actually reachable else return TARGET_OFFLINE error
-         *	validate the authentication has not expired else return EXPIRED_ACCESS_TOKEN error
-         * Please see the technical documentation for detailed list of errors
-         */
         if (event.payload.switchControlAction === 'TURN_ON') {
             if(applianceId.indexOf("S")===0){
-              runScene(ServerRelay,PK_Device,RelaySessionToken,applianceId,1,function(response){
+              runScene(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(response){
                 if(response.indexOf("ERROR")===0){
+                    log("scene failed",result);
                   context.fail(generateControlError("SwitchOnOffResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
                 } else {
+                    log("scene succeeded",result);
                 context.succeed(result);
                }
             });
-            }
+            } else if (applianceId.indexOf("T")===0){
+                  context.fail(generateControlError("SwitchOnOffResponse", 'UNSUPPORTED_OPERATION', response));
+            } else {
+
             switchDevice(ServerRelay,PK_Device,RelaySessionToken,applianceId,1,function(response){
                 if(response.indexOf("ERROR")===0){
                   context.fail(generateControlError("SwitchOnOffResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
@@ -246,7 +239,11 @@ function handleControl(event, context) {
                 context.succeed(result);
                }
             });
+            }
         } else if (event.payload.switchControlAction === "TURN_OFF") {
+            if (applianceId.indexOf("T")===0||applianceId.indexOf("S")===0){
+                  context.fail(generateControlError("SwitchOnOffResponse", 'UNSUPPORTED_OPERATION', response));
+            } else {
             switchDevice(ServerRelay,PK_Device,RelaySessionToken,applianceId,0,function(response){
                 if(response.indexOf("ERROR")===0){
                   context.fail(generateControlError("SwitchOnOffResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
@@ -264,51 +261,81 @@ function handleControl(event, context) {
 
             });
         }
-
-
-
+      }
     } else if (event.header.name === 'AdjustNumericalSettingRequest') {
-        var targetDimLevel=0;
+        if (applianceId.indexOf("T")===0){
+          if (event.payload.adjustmentType === 'RELATIVE') {
+            getCurrentTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperature){
+                if(isNaN(currentTemperature)){
+                    context.fail(generateControlError("AdjustNumericalSettingResponse", 'UNEXPECTED_INFORMATION_RECEIVED', 'Could not get current dim level'));
+                } else {
+                  var targetTemperature=currentTemperature+event.payload.adjustmentValue;
+                  setTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,targetTemperature.toFixed(),function(response){
+                if(response.indexOf("ERROR")===0){
+                    context.fail(generateControlError("AdjustNumericalSettingResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
+                } else {
+                  var payloads = {success: true};
+                  var result = {header: headers,payload: payloads};
+                  context.succeed(result);
+                }
+            });
+
+                }
+            });
+        } else {
+            var targetTemperature=event.payload.adjustmentValue;
+            setTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,targetTemperature.toFixed(),function(response){
+                if(response.indexOf("ERROR")===0){
+                    context.fail(generateControlError("AdjustNumericalSettingResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
+                } else {
+                var payloads = {success: true};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+                }
+            });
+        }
+        } else {
+
         if (event.payload.adjustmentType === 'RELATIVE') {
             getCurrentDimLevel(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentDimLevel){
                 if(isNaN(currentDimLevel)){
                             context.fail(generateControlError("AdjustNumericalSettingResponse", 'UNEXPECTED_INFORMATION_RECEIVED', 'Could not get current dim level'));
                 } else {
-                  targetDimLevel=currentDimLevel+event.payload.adjustmentValue;
+                  var targetDimLevel=currentDimLevel+event.payload.adjustmentValue;
                   if(targetDimLevel>100||targetDimLevel<0){
                             context.fail(generateControlError("AdjustNumericalSettingResponse", 'TARGET_SETTING_OUT_OF_RANGE', 'Out of range'));
                   }
+                dimDevice(ServerRelay,PK_Device,RelaySessionToken,applianceId,targetDimLevel.toFixed(),function(response){
+                if(response.indexOf("ERROR")===0){
+                  context.fail(generateControlError("AdjustNumericalSettingResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
+                } else {
+                var payloads = {success: true};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+                }
+            });
                 }
             });
         } else {
-            targetDimLevel=event.payload.adjustmentValue;
-        }
+            var targetDimLevel=event.payload.adjustmentValue;
+
             dimDevice(ServerRelay,PK_Device,RelaySessionToken,applianceId,targetDimLevel.toFixed(),function(response){
-                         if(response.indexOf("ERROR")===0){
+                if(response.indexOf("ERROR")===0){
                   context.fail(generateControlError("AdjustNumericalSettingResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
                 } else {
-
-                var payloads = {
-                    success: true
-                };
-                var result = {
-                    header: headers,
-                    payload: payloads
-                };
-
-                // Warning! Logging this with production data might be a security problem.
-               // log('Done with result', JSON.stringify(result));
+                var payloads = {success: true};
+                var result = {header: headers,payload: payloads};
                 context.succeed(result);
                 }
-
             });
         }
 
+        }
+
+    }
     });
 
 }
-
-
 
 function getVeraSession(username,password,cbfunc){
         getAuthToken( username,password, function ( AuthToken, AuthSigToken, Server_Account ) {
@@ -318,19 +345,8 @@ function getVeraSession(username,password,cbfunc){
 		    getSessionToken( Server_Account, AuthToken, AuthSigToken, function(AuthSessionToken) {
 			    getDeviceList(Server_Account,PK_Account,AuthSessionToken,function(deviceTable) {
 					var Devices = parseJson(deviceTable,"device");
-					if(PK_Device==""){
-					  PK_Device=Devices.Devices[0].PK_Device;
-					  Server_Device=Devices.Devices[0].Server_Device;
-					} else {
-					  var deviceArrayLength = Devices.Devices.length;
-                      for (var i = 0; i < deviceArrayLength; i++) {
-                        if(Devices.Devices[i].PK_Device==PK_Device){
-                          Server_Device=Devices.Devices[i].Server_Device;
-                          break;
-                        }
-                      }
-					}
-
+					var PK_Device=Devices.Devices[0].PK_Device;
+					var Server_Device=Devices.Devices[0].Server_Device;
 					getSessionToken(Server_Device, AuthToken, AuthSigToken, function(ServerDeviceSessionToken) {
 				        getServerRelay(Server_Device,PK_Device,ServerDeviceSessionToken,function(sessionRelayText){
 					        var Relays = parseJson(sessionRelayText,"relays");
@@ -425,97 +441,63 @@ function getServerRelay( ServerDevice,PK_Device,SessionToken, cbfunc )
 
 function getStatuses( ServerRelay,PK_Device,RelaySessionToken, cbfunc )
 {
-	var options = {
-	hostname: ServerRelay,
-	port: 443,
-	path: '/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=sdata',
-	headers: {"MMSSession":RelaySessionToken}
-	};
-
-	https.get(options, function(response) {
-        var body = '';
-        response.on('data', function(d) {body += d;});
-        response.on('end', function() {cbfunc(body);});
-	    response.on("error",function(e){log("Got error: " + e.message); });
-	});
-
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=sdata',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
 }
 
 function switchDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,deviceState,cbfunc )
 {
-	var options = {
-	hostname: ServerRelay,
-	port: 443,
-	path: '/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue='+deviceState+'&output_format=json',
-	headers: {"MMSSession":RelaySessionToken}
-	};
-
-	https.get(options, function(response) {
-        var body = '';
-        response.on('data', function(d) {body += d;});
-        response.on('end', function() {cbfunc(body);});
-	    response.on("error",function(e){log("Got error: " + e.message); });
-	});
-}
-
-function dimDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,dimLevel,cbfunc )
-{
-	var options = {
-	hostname: ServerRelay,
-	port: 443,
-	path: '/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget='+dimLevel+'&output_format=json',
-	headers: {"MMSSession":RelaySessionToken}
-	};
-
-	https.get(options, function(response) {
-        var body = '';
-        response.on('data', function(d) {body += d;});
-        response.on('end', function() {cbfunc(body);});
-	    response.on("error",function(e){log("Got error: " + e.message); });
-	});
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue='+deviceState+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
 }
 
 function runScene( ServerRelay,PK_Device,RelaySessionToken, sceneId,cbfunc )
 {
-	var options = {
-	hostname: ServerRelay,
-	port: 443,
-	path: '/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum='+sceneId.substring(1)+'&output_format=json',
-	headers: {"MMSSession":RelaySessionToken}
-	};
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum='+sceneId.substring(1)+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
 
+function dimDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,dimLevel,cbfunc )
+{
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Dimming1&action=SetLoadLevelTarget&newLoadlevelTarget='+dimLevel+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
+
+function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc )
+{
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Dimming1&Variable=LoadLevelTarget',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
+
+function getCurrentTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc )
+{
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:upnp-org:serviceId:TemperatureSetpoint1&Variable=CurrentSetpoint',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
+
+function setTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,temperature,cbfunc )
+{
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:upnp-org:serviceId:TemperatureSetpoint1&action=SetCurrentSetpoint&NewCurrentSetpoint='+temperature+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
+
+function runVeraCommand(path, ServerRelay,RelaySessionToken,cbfunc ){
+	var options = {hostname: ServerRelay,port: 443,headers: {"MMSSession":RelaySessionToken},
+	path: path};
 	https.get(options, function(response) {
         var body = '';
         response.on('data', function(d) {body += d;});
         response.on('end', function() {cbfunc(body);});
-	    response.on("error",function(e){log("Got error: " + e.message); });
+        response.on("error",function(e){log("Got error: " + e.message); });
 	});
 }
-
-
-function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc )
-{
-
-	var options = {
-	hostname: ServerRelay,
-	port: 443,
-	path: '/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Dimming1&Variable=LoadLevelTarget',
-	headers: {"MMSSession":RelaySessionToken}
-	};
-
-	https.get(options, function(response) {
-        var body = '';
-        response.on('data', function(d) {body += d;});
-
-        response.on('end', function() {
-	      cbfunc(body);
-	    });
-
-	    response.on("error",function(e){log("Got error: " + e.message); });
-	});
-}
-
-
 
 /**
  * Utility functions.
@@ -524,9 +506,7 @@ function parseJson(jsonMessage,requestType){
     try {
         return JSON.parse(jsonMessage);
     } catch (ex)
-    {
-    log("Parsing Error","error parsing JSON message of type "+requestType+": "+jsonMessage);
-    }
+    {log("Parsing Error","error parsing JSON message of type "+requestType+": "+jsonMessage);}
 }
 
 function log(title, msg) {

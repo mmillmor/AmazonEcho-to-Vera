@@ -1,0 +1,16 @@
+{
+  "header": {
+    "namespace": "Control",
+    "name": "AdjustNumericalSettingRequest",
+    "payloadVersion": "1"
+  },
+  "payload": {
+    "accessToken": "enterAccessToken",
+    "adjustmentType": "RELATIVE",
+    "adjustmentUnit": "PERCENTAGE",
+    "adjustmentValue": 1,
+    "appliance": {
+      "applianceId": "T6"
+    }
+  }
+}
