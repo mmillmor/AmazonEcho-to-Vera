@@ -245,7 +245,15 @@ function handleControl(event, context) {
             }
         } else if (event.payload.switchControlAction === "TURN_OFF") {
             if (applianceId.indexOf("T")===0||applianceId.indexOf("S")===0){
-                  context.fail(generateControlError("SwitchOnOffResponse", 'UNSUPPORTED_OPERATION', response));
+              stopScene(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(response){
+                if(response.indexOf("ERROR")===0){
+                    log("scene failed",result);
+                  context.fail(generateControlError("SwitchOnOffResponse", 'TARGET_HARDWARE_MALFUNCTION', response));
+                } else {
+                    log("scene succeeded",result);
+                context.succeed(result);
+               }
+            });
             } else {
             switchDevice(ServerRelay,PK_Device,RelaySessionToken,applianceId,0,function(response){
                 if(response.indexOf("ERROR")===0){
@@ -470,6 +478,13 @@ function switchDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,deviceS
 function runScene( ServerRelay,PK_Device,RelaySessionToken, sceneId,cbfunc )
 {
     runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=RunScene&SceneNum='+sceneId.substring(1)+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
+        cbfunc(response);
+    });
+}
+
+function stopScene( ServerRelay,PK_Device,RelaySessionToken, sceneId,cbfunc )
+{
+    runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=SceneOff&SceneNum='+sceneId.substring(1)+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
         cbfunc(response);
     });
 }
