@@ -1,4 +1,6 @@
-# AmazonEcho-to-Vera
+# AmazonEcho-to-Vera for Amazon Smart Home V1
+
+**NOTE: Amazon have moved on to a new api, and a native skill based on the new API has been submitted for approval. This code will not work with the new smart home api, and is only retained for historic interest.**
 
 Amazon Echo to Vera integration, Martin Millmore, [MillieSoft](http://www.millisoft.co.uk).
 
