@@ -26,10 +26,12 @@ if (empty($_POST)) {
     <p>This site is an OAuth2 server for accessing your home automation device from an Amazon Echo device. Please log in with your Vera credentials.
     Note, your encrypted access details will be stored on MillieSoft servers. They will only be used for allowing your Amazon Echo device to talk to
     your home automation device, and will not be transferred, sold or used in any other way.<p>
+    <p>If you have more than one Vera device, you can optionally enter the device number to control. If you only have one Vera, leave it blank.</p>
 <form method="post">
  <p align="center">
   <input type="text" name="username" placeholder="username"><br/>
   <input type="password" name="password" value=""><br/>
+  <input type="text" name="device" value="" placeholder="optional device number"><br/>
     <button type="submit" name="authorized" value="yes">Authorize</button>&nbsp
     <button type="submit" name="authorized" value="no">Cancel</button>
 </p>

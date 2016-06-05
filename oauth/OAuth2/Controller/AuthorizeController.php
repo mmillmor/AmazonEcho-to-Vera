@@ -87,7 +87,7 @@ class AuthorizeController implements AuthorizeControllerInterface
             return;
         }
 
-        $auth_url="https://vera-us-oem-authd11.mios.com/autha/auth/username/".$request->request["username"]."?SHA1Password=".sha1($request->request["username"].$request->request["password"]."oZ7QE6LcLJp6fiWzdqZc")."&PK_Oem=1";
+        $auth_url="https://vera-us-oem-autha.mios.com/autha/auth/username/".$request->request["username"]."?SHA1Password=".sha1($request->request["username"].$request->request["password"]."oZ7QE6LcLJp6fiWzdqZc")."&PK_Oem=1";
         $loginCorrect=false;
         try{
           $validUser=@file_get_contents($auth_url);
@@ -104,7 +104,7 @@ class AuthorizeController implements AuthorizeControllerInterface
           $response->setRedirect($this->config['redirect_status_code'], $redirect_uri, $this->state, $error, $error_message);
           return;
         }
-        $user_id=$request->request["username"].":".sha1($request->request["username"].$request->request["password"]."oZ7QE6LcLJp6fiWzdqZc");
+        $user_id=$request->request["username"].":".sha1($request->request["username"].$request->request["password"]."oZ7QE6LcLJp6fiWzdqZc").":".$request->request["device"];
         $authResult = $this->responseTypes[$this->response_type]->getAuthorizeResponse($params, $user_id);
         list($redirect_uri, $uri_params) = $authResult;
 
@@ -131,7 +131,7 @@ class AuthorizeController implements AuthorizeControllerInterface
      */
     protected function buildAuthorizeParameters($request, $response, $user_id)
     {
-        //millmore added username and password
+        //millmore added username and password and device
         // @TODO: we should be explicit with this in the future
         $params = array(
             'scope'         => $this->scope,
@@ -141,6 +141,7 @@ class AuthorizeController implements AuthorizeControllerInterface
             'response_type' => $this->response_type,
             'username' => $request->request["username"],
             'password' => $request->request["password"],
+            'device' => $request->request["device"],
         );
 
         return $params;
