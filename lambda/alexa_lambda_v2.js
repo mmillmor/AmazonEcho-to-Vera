@@ -142,7 +142,7 @@ function handleDiscovery(event, context) {
                 case 17:
                     deviceCategory="Temperature Sensor";
                     continue deviceLoop;
-                case 17:
+                case 18:
                     deviceCategory="Light Sensor";
                     continue deviceLoop;
                 default:
@@ -389,7 +389,7 @@ function handleControl(event, context) {
               code: 'INVALID_ACCESS_TOKEN',
               description: 'Could not find user'
             }
-          }
+          };
         }
 });
 

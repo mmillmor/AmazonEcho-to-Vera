@@ -14,6 +14,7 @@ if (empty($_POST)) {
   exit('
     <html>
     <head>
+    <title>PowerController for Vera</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -22,7 +23,8 @@ if (empty($_POST)) {
      </style>
     </head>
     <body>
-    <h1 align="center">MillieSoft OAuth2 server for Vera</h1>
+    <div style="text-align: center"><img  src="logo2_sm.png" /></div>
+    <h1 align="center">PowerController for Vera</h1>
     <p>This site is an OAuth2 server for accessing your home automation device from an Amazon Echo device. Please log in with your Vera credentials.
     Note, your encrypted access details will be stored on MillieSoft servers. They will only be used for allowing your Amazon Echo device to talk to
     your home automation device, and will not be transferred, sold or used in any other way.<p>
@@ -30,7 +32,7 @@ if (empty($_POST)) {
 <form method="post">
  <p align="center">
   <input type="text" name="username" placeholder="username"><br/>
-  <input type="password" name="password" value=""><br/>
+  <input type="password" name="password" placeholder="password" value=""><br/>
   <input type="text" name="device" value="" placeholder="optional device number"><br/>
     <button type="submit" name="authorized" value="yes">Authorize</button>&nbsp
     <button type="submit" name="authorized" value="no">Cancel</button>
