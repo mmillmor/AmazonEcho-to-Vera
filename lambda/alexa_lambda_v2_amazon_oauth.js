@@ -81,7 +81,7 @@ function generateUUID(){
  * customer.
  */
 function handleDiscovery(event, context) {
-    var headers = {
+var headers = {
         namespace: 'Alexa.ConnectedHome.Discovery',
         name: 'DiscoverAppliancesResponse',
         payloadVersion: '2',
@@ -165,18 +165,28 @@ function handleDiscovery(event, context) {
 
           }
 
+                    actions=["turnOff", "turnOn"];
         for(var k = 0; k < allScenes.length; k++) {
             var scene = allScenes[k];
             if(scene.name.indexOf("_")!==0){
+                var roomName="Unknown Room";
+                for (var j=0;j<allRooms.length;j++){
+                    if(allRooms[j].id==scene.room){
+                        roomName=allRooms[j].name;
+                        break;
+                    }
+                }
+                applicanceId="S"+scene.id.toString();
 
             var applianceDiscovered2 = {
+            applianceId: applicanceId,
             manufacturerName:"vera",
             modelName:"vera scene",
             version: "1",
-            applianceId: "S"+scene.id.toString(),
-            friendlyName: scene.name + " Scene",
+            friendlyName: scene.name,
+            friendlyDescription: scene.name+" Scene in "+roomName,
             isReachable: true,
-            actions:["turnOff", "turnOn"],
+            "actions":actions,
             additionalApplianceDetails: {}
             };
             appliances.push(applianceDiscovered2);
