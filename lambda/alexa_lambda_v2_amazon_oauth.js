@@ -7,21 +7,21 @@
     or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 */
 
-var username="{enter your username}";
-var password="{enter your encoded password}";
-var PK_Device="";  // if you want to use a specific device, enter it's device ID here
+var username = "{enter your username}";
+var password = "{enter your encoded password}";
+var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
 
 var https = require('https');
 var http = require('http');
 var log = log;
 var generateControlError = generateControlError;
 
-var Server_Device="";
+var Server_Device = "";
 /**
  * Main entry point.
  * Incoming events from Alexa Lighting APIs are processed via this method.
  */
-exports.handler = function(event, context) {
+exports.handler = function (event, context) {
     switch (event.header.namespace) {
 
         case 'Alexa.ConnectedHome.Discovery':
@@ -33,7 +33,7 @@ exports.handler = function(event, context) {
         break;
 
         case 'Alexa.ConnectedHome.System':
-            if(event.header.name=="HealthCheckRequest"){
+            if (event.header.name=="HealthCheckRequest"){
                 var headers = {
                     namespace: 'Alexa.ConnectedHome.System',
                     name: 'HealthCheckResponse',
@@ -67,9 +67,9 @@ exports.handler = function(event, context) {
 function generateUUID(){
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
+        var r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+        return (c =='x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
 }
@@ -91,59 +91,61 @@ var headers = {
     var accessToken = event.payload.accessToken.trim();
 
     var appliances = [];
-    getVeraSession(username,password,PK_Device,function(ServerRelay,RelaySessionToken,PK_Device){
-        getStatuses(ServerRelay,PK_Device,RelaySessionToken,function(statusText){
-          var Status = parseJson(statusText,"status");
-          var allDevices=Status.devices;
-          var allRooms=Status.rooms;
-          var allScenes=Status.scenes;
-          deviceLoop:
+    getVeraSession(username,password,PK_Device,function (ServerRelay,RelaySessionToken,PK_Device){
+        getStatuses(ServerRelay,PK_Device,RelaySessionToken,function (statusText){
+            var Status = parseJson(statusText,"status");
+            var allDevices = Status.devices;
+            var allRooms = Status.rooms;
+            var allScenes = Status.scenes;
+            var actions = [];
+            var roomName = "Unknown Room";
+            var applicanceId = "";
+        deviceLoop:
           for(var i = 0; i < allDevices.length; i++) {
             var device = allDevices[i];
 
-            if(device.name.indexOf("_")!==0){
-                var roomName="Unknown Room";
-                for (var j=0;j<allRooms.length;j++){
-                    if(allRooms[j].id==device.room){
-                        roomName=allRooms[j].name;
+            if(device.name.indexOf("_") !== 0){
+                roomName = "Unknown Room";
+                for (var j = 0;j<allRooms.length;j++){
+                    if(allRooms[j].id == device.room){
+                        roomName = allRooms[j].name;
                         break;
                     }
                 }
 
-            var deviceCategory="Unknown type of device";
-            var actions=[];
-            var applicanceId=device.id.toString();
+            var deviceCategory = "Unknown type of device";
+            applicanceId = device.id.toString();
             switch (device.category){
                 case 2:
-                    deviceCategory="Dimmable Switch";
-                    actions=["turnOff", "turnOn","setPercentage","incrementPercentage","decrementPercentage"];
+                    deviceCategory = "Dimmable Switch";
+                    actions = ["turnOff", "turnOn","setPercentage","incrementPercentage","decrementPercentage"];
                     break;
                 case 3:
-                    deviceCategory="Switch";
-                    actions=["turnOff", "turnOn"];
+                    deviceCategory = "Switch";
+                    actions = ["turnOff", "turnOn"];
                     break;
                 case 4:
-                    deviceCategory="Sensor";
+                    deviceCategory = "Sensor";
                     continue deviceLoop;
                 case 5:
-                    deviceCategory="Thermostat";
-                    applicanceId="T"+device.id.toString();
-                    actions=["setTargetTemperature", "decrementTargetTemperature","incrementTargetTemperature"];
+                    deviceCategory = "Thermostat";
+                    applicanceId = "T"+device.id.toString();
+                    actions = ["setTargetTemperature", "decrementTargetTemperature","incrementTargetTemperature"];
                     break;
                 case 6:
-                    deviceCategory="Camera";
+                    deviceCategory = "Camera";
                     continue deviceLoop;
                 case 11:
-                    deviceCategory="Generic IO";
+                    deviceCategory = "Generic IO";
                     continue deviceLoop;
                 case 16:
-                    deviceCategory="Humidity Sensor";
+                    deviceCategory = "Humidity Sensor";
                     continue deviceLoop;
                 case 17:
-                    deviceCategory="Temperature Sensor";
+                    deviceCategory = "Temperature Sensor";
                     continue deviceLoop;
                 case 18:
-                    deviceCategory="Light Sensor";
+                    deviceCategory = "Light Sensor";
                     continue deviceLoop;
                 default:
                     continue deviceLoop;
@@ -165,18 +167,18 @@ var headers = {
 
           }
 
-                    actions=["turnOff", "turnOn"];
+        actions = ["turnOff", "turnOn"];
         for(var k = 0; k < allScenes.length; k++) {
             var scene = allScenes[k];
-            if(scene.name.indexOf("_")!==0){
-                var roomName="Unknown Room";
-                for (var j=0;j<allRooms.length;j++){
-                    if(allRooms[j].id==scene.room){
-                        roomName=allRooms[j].name;
+            if(scene.name.indexOf("_") !== 0){
+                roomName = "Unknown Room";
+                for (var j2 = 0;j2<allRooms.length;j2++){
+                    if(allRooms[j2].id == scene.room){
+                        roomName = allRooms[j2].name;
                         break;
                     }
                 }
-                applicanceId="S"+scene.id.toString();
+                applicanceId = "S"+scene.id.toString();
 
             var applianceDiscovered2 = {
             applianceId: applicanceId,
@@ -219,7 +221,7 @@ var headers = {
  */
 function handleControl(event, context) {
     var requestType=event.header.name;
-    var responseType=event.header.name.replace("Request","Confirmation")
+    var responseType=event.header.name.replace("Request","Confirmation");
                 var headers = {
                     namespace: "Alexa.ConnectedHome.Control",
                     name: responseType,
@@ -415,14 +417,11 @@ function getVeraSession(username,password,device,cbfunc){
 function getAuthToken( user, pwd, cbfunc )
 {
 
-var options = {
-  hostname: 'vera-us-oem-autha.mios.com',
-  path: '/autha/auth/username/'+user+'?SHA1Password='+pwd+'&PK_Oem=1',
-  port:443
-};
+    var keepAliveAgent = new https.Agent({ keepAlive: true });
+    var options = {hostname: 'vera-us-oem-autha.mios.com',path: '/autha/auth/username/'+user+'?SHA1Password='+pwd+'&PK_Oem=1',port:443,agent:keepAliveAgent};
 
 
-https.get(options, function(response) {
+    https.get(options, function(response) {
         var body = '';
         response.on('data', function(d) { body += d;});
         response.on('end', function() {
@@ -439,12 +438,9 @@ https.get(options, function(response) {
 
 function getSessionToken(server, AuthToken, AuthSigToken, cbfunc )
 {
-    var options = {
-      hostname: server,
-      port: 443,
-      path: '/info/session/token',
-      headers: {"MMSAuth":AuthToken,"MMSAuthSig":AuthSigToken}
-    };
+    var keepAliveAgent = new https.Agent({ keepAlive: true });
+    var options = {hostname: server,port: 443,path: '/info/session/token',headers: {"MMSAuth":AuthToken,"MMSAuthSig":AuthSigToken},agent:keepAliveAgent};
+
     https.get(options, function(response) {
         var SessionToken = '';
         response.on('data', function(d) {SessionToken += d;});
@@ -457,12 +453,8 @@ function getSessionToken(server, AuthToken, AuthSigToken, cbfunc )
 
 function getDeviceList( Server_Account,PK_Account,SessionToken, cbfunc )
 {
-	var options = {
-	hostname: Server_Account,
-	port: 443,
-	path: '/account/account/account/'+PK_Account+'/devices',
-	headers: {"MMSSession":SessionToken}
-	};
+    var keepAliveAgent = new https.Agent({ keepAlive: true });
+	var options = {	hostname: Server_Account,port: 443,path: '/account/account/account/'+PK_Account+'/devices',headers: {"MMSSession":SessionToken},agent:keepAliveAgent};
 
 	https.get(options, function(response) {
         var body = '';
@@ -475,12 +467,8 @@ function getDeviceList( Server_Account,PK_Account,SessionToken, cbfunc )
 
 function getServerRelay( ServerDevice,PK_Device,SessionToken, cbfunc )
 {
-	var options = {
-	hostname: ServerDevice,
-	port: 443,
-	path: '/device/device/device/'+PK_Device,
-	headers: {"MMSSession":SessionToken}
-	};
+    var keepAliveAgent = new https.Agent({ keepAlive: true });
+	var options = {hostname: ServerDevice,port: 443,path: '/device/device/device/'+PK_Device,headers: {"MMSSession":SessionToken},agent:keepAliveAgent};
 
 	https.get(options, function(response) {
         var body = '';
@@ -548,8 +536,8 @@ function setTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,tempe
 }
 
 function runVeraCommand(path, ServerRelay,RelaySessionToken,cbfunc ){
-	var options = {hostname: ServerRelay,port: 443,headers: {"MMSSession":RelaySessionToken},
-	path: path};
+    var keepAliveAgent = new https.Agent({ keepAlive: true });
+	var options = {hostname: ServerRelay,port: 443,headers: {"MMSSession":RelaySessionToken},path: path,agent:keepAliveAgent};
 
 	https.get(options, function(response) {
         var body = '';
@@ -567,7 +555,8 @@ function parseJson(jsonMessage,requestType){
     try {
         return JSON.parse(jsonMessage);
     } catch (ex)
-    {log("Parsing Error","error parsing JSON message of type "+requestType+": "+jsonMessage);}
+    {log("Parsing Error","error parsing JSON message of type "+requestType+": "+jsonMessage);
+    console.error(ex);}
 }
 
 function log(title, msg) {
