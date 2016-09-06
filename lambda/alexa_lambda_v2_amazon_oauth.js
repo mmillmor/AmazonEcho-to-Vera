@@ -10,7 +10,7 @@
 var username = "{enter your username}";
 var password = "{enter your encoded password}";
 var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
-
+var scale="C"; // change to F for fahrenheit support
 var https = require('https');
 var http = require('http');
 var log = log;
@@ -329,10 +329,16 @@ function handleControl(event, context) {
             });
         } else if (event.header.name === 'SetTargetTemperatureRequest') {
                 var targetTemperature=event.payload.targetTemperature.value;
+                if(scale === 'F'){
+                  targetTemperature=32 + (targetTemperature*1.8);
+				}
                 setTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,targetTemperature.toFixed(),function(response){
                     if(response.indexOf("ERROR")===0){
                         context.fail(generateControlError(responseType, 'TargetHardwareMalfunctionError', response));
                     } else {
+					if(scale === 'F'){
+					  targetTemperature= (targetTemperature-32)/1.8;
+					}
                     var payloads = {achievedState: {targetTemperature:{value: targetTemperature},mode:{value:"AUTO"}},previousState: {targetTemperature:{value: targetTemperature},mode:{value:"AUTO"}},targetTemperature:{value: targetTemperature},temperatureMode:{value:"AUTO"}};
                     var result = {header: headers,payload: payloads};
                     context.succeed(result);
@@ -349,6 +355,9 @@ function handleControl(event, context) {
                 if(response.indexOf("ERROR")===0){
                     context.fail(generateControlError(responseType, 'TargetHardwareMalfunctionError', response));
                 } else {
+					if(scale === 'F'){
+					  targetTemperature= (targetTemperature-32)/1.8;
+					}
                     var payloads = {achievedState: {targetTemperature:{value: targetTemperature},mode:{value:"AUTO"}},previousState: {targetTemperature:{value: currentTemperature},mode:{value:"AUTO"}},targetTemperature:{value: targetTemperature},temperatureMode:{value:"AUTO"}};
                   var result = {header: headers,payload: payloads};
                   context.succeed(result);
@@ -365,6 +374,9 @@ function handleControl(event, context) {
                 if(response.indexOf("ERROR")===0){
                     context.fail(generateControlError(responseType, 'TargetHardwareMalfunctionError', response));
                 } else {
+					if(scale === 'F'){
+					  targetTemperature= (targetTemperature-32)/1.8;
+					}
                     var payloads = {achievedState: {targetTemperature:{value: targetTemperature},mode:{value:"AUTO"}},previousState: {targetTemperature:{value: currentTemperature},mode:{value:"AUTO"}},targetTemperature:{value: targetTemperature},temperatureMode:{value:"AUTO"}};
                   var result = {header: headers,payload: payloads};
                   context.succeed(result);
