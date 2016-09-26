@@ -11,6 +11,7 @@ var username = "{enter your username}";
 var password = "{enter your encoded password}";
 var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
 var scale="C"; // change to F for fahrenheit support
+var AppendToSceneName = " Scene";   // change to "" to NOT append ' Scene' to each scene name
 var https = require('https');
 var http = require('http');
 var log = log;
@@ -185,7 +186,7 @@ var headers = {
             manufacturerName:"vera",
             modelName:"vera scene",
             version: "1",
-            friendlyName: scene.name,
+            friendlyName: scene.name + AppendToSceneName,
             friendlyDescription: scene.name+" Scene in "+roomName,
             isReachable: true,
             "actions":actions,
