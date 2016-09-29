@@ -12,6 +12,10 @@ var password = "{enter your encoded password}";
 var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
 var scale="C"; // change to F for fahrenheit support
 var AppendToSceneName = "";   // change to " Scene" to append ' Scene' to each scene name
+var devicesToIgnore=[]; // create a list of IDs to ignore, e.g. ["252",S7"] to exclude devices from discovery
+
+/* DO NOT MODIFY BELOW THIS LINE */
+
 var https = require('https');
 var http = require('http');
 var log = log;
@@ -116,6 +120,9 @@ var headers = {
 
             var deviceCategory = "Unknown type of device";
             applicanceId = device.id.toString();
+            if(devicesToIgnore.indexOf(applicanceId)>=0){
+              continue deviceLoop;
+            }
             switch (device.category){
                 case 2:
                     deviceCategory = "Dimmable Switch";
@@ -169,9 +176,14 @@ var headers = {
           }
 
         actions = ["turnOff", "turnOn"];
+        sceneLoop:
         for(var k = 0; k < allScenes.length; k++) {
             var scene = allScenes[k];
             if(scene.name.indexOf("_") !== 0){
+                applicanceId = "S"+scene.id.toString();
+                if(devicesToIgnore.indexOf(applicanceId)>=0){
+                    continue sceneLoop;
+                }
                 roomName = "Unknown Room";
                 for (var j2 = 0;j2<allRooms.length;j2++){
                     if(allRooms[j2].id == scene.room){
@@ -179,22 +191,20 @@ var headers = {
                         break;
                     }
                 }
-                applicanceId = "S"+scene.id.toString();
 
-            var applianceDiscovered2 = {
-            applianceId: applicanceId,
-            manufacturerName:"vera",
-            modelName:"vera scene",
-            version: "1",
-            friendlyName: scene.name + AppendToSceneName,
-            friendlyDescription: scene.name+" Scene in "+roomName,
-            isReachable: true,
-            "actions":actions,
-            additionalApplianceDetails: {}
-            };
-            appliances.push(applianceDiscovered2);
+            	var applianceDiscovered2 = {
+            		applianceId: applicanceId,
+            		manufacturerName:"vera",
+            		modelName:"vera scene",
+            		version: "1",
+            		friendlyName: scene.name + AppendToSceneName,
+            		friendlyDescription: scene.name+" Scene in "+roomName,
+            		isReachable: true,
+            		"actions":actions,
+            		additionalApplianceDetails: {}
+            	};
+            	appliances.push(applianceDiscovered2);
             }
-
         }
 
     appliances.sort(function(a, b) {
