@@ -12,7 +12,7 @@ var password = "{enter your encoded password}";
 var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
 var scale="C"; // change to F for fahrenheit support
 var AppendToSceneName = "";   // change to " Scene" to append ' Scene' to each scene name
-var devicesToIgnore=[]; // create a list of IDs to ignore, e.g. ["252",S7"] to exclude devices from discovery
+var devicesToIgnore=[]; // create a list of IDs to ignore, e.g. ["252","S7"] to exclude devices from discovery
 
 /* DO NOT MODIFY BELOW THIS LINE */
 
