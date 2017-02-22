@@ -35,6 +35,9 @@ exports.handler = function (event, context) {
     case 'Alexa.ConnectedHome.Control':
       handleControl(event, context);
       break;
+    case 'Alexa.ConnectedHome.Query':
+      handleQuery(event, context);
+      break;
     case 'Alexa.ConnectedHome.System':
       if (event.header.name == "HealthCheckRequest"){
         var headers = {
@@ -389,6 +392,64 @@ function handleControl(event, context) {
   });
 }
 
+/**
+ * Query events are processed here.
+ */
+
+function handleQuery(event, context) {
+  var requestType = event.header.name;
+  var responseType = event.header.name.replace("Request","Response");
+  var headers = {
+    namespace: "Alexa.ConnectedHome.Control",
+    name: responseType,
+    payloadVersion: "2",
+    messageId: generateUUID()
+  };
+  var result = {
+    header: headers,
+    payload: {}
+  };
+  getVeraSession(username,password,PK_Device,function(ServerRelay,RelaySessionToken,PK_Device){
+    var applianceId = event.payload.appliance.applianceId;
+    if (typeof applianceId !== "string" ) {
+      log("event payload is invalid",event);
+      context.fail(generateControlError(responseType, 'UNEXPECTED_INFORMATION_RECEIVED', 'Input is invalid'));
+    }
+    var date = new Date();
+    date.toISOString();
+    if (event.header.name === 'GetTemperatureReadingRequest') {
+        getCurrentTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
+          var currentTemperature = Number(currentTemperatureString);
+          if(isNaN(currentTemperature)){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
+          } else {
+			var payloads = {temperatureReading: {value:currentTemperature},applianceResponseTimestamp: date.toISOString()};
+			var result = {header: headers,payload: payloads};
+			context.succeed(result);
+
+          }
+      });
+
+    } else if (event.header.name === 'GetTargetTemperatureRequest') {
+      getTemperatureMode(ServerRelay, PK_Device, RelaySessionToken, applianceId, function(temperatureMode){
+        getTargetTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(targetTemperatureString){
+          var targetTemperature = Number(targetTemperatureString);
+          if(isNaN(targetTemperature)){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
+          } else {
+			var payloads = {targetTemperature: {value:targetTemperature},temperatureMode:{value:temperatureMode.toUpperCase()},applianceResponseTimestamp: date.toISOString()};
+			var result = {header: headers,payload: payloads};
+			context.succeed(result);
+
+          }
+      });
+     });
+    } else {
+      // error
+    }
+  });
+}
+
 function getVeraSession(username,password,device,cbfunc){
   getAuthToken( username,password, function ( AuthToken, AuthSigToken, Server_Account ) {
     var AuthTokenDecoded = new Buffer(AuthToken, 'base64');
@@ -511,6 +572,12 @@ function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,c
 
 function getCurrentTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc ){
   runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:upnp-org:serviceId:TemperatureSetpoint1&Variable=CurrentSetpoint',ServerRelay,RelaySessionToken,function(response){
+    cbfunc(response);
+  });
+}
+
+function getTargetTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:upnp-org:serviceId:TemperatureSetpoint1&Variable=SetpointTarget',ServerRelay,RelaySessionToken,function(response){
     cbfunc(response);
   });
 }
