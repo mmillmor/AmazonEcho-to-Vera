@@ -102,6 +102,7 @@ function handleDiscovery(event, context) {
       var allRooms = Status.rooms;
       var allScenes = Status.scenes;
       var actions = [];
+      var applianceTypes=[];
       var roomName = "Unknown Room";
       var applicanceId = "";
       deviceLoop:
@@ -124,10 +125,12 @@ function handleDiscovery(event, context) {
             case 2:
               deviceCategory = "Dimmable Switch";
               actions = ["turnOff", "turnOn","setPercentage","incrementPercentage","decrementPercentage"];
+              applianceTypes=["LIGHT"];
               break;
             case 3:
               deviceCategory = "Switch";
               actions = ["turnOff", "turnOn"];
+              applianceTypes=["LIGHT"];
               break;
             case 4:
               deviceCategory = "Sensor";
@@ -135,11 +138,21 @@ function handleDiscovery(event, context) {
             case 5:
               deviceCategory = "Thermostat";
               applicanceId = "T" + device.id.toString();
-              actions = ["setTargetTemperature", "decrementTargetTemperature","incrementTargetTemperature"];
+              actions = ["setTargetTemperature", "decrementTargetTemperature","incrementTargetTemperature","getTargetTemperature","getTemperatureReading"];
+              applianceTypes=["THERMOSTAT"];
               break;
             case 6:
               deviceCategory = "Camera";
-              continue deviceLoop;
+              applianceTypes=["CAMERA"];
+              actions = ["retrieveCameraStreamUri"];
+              applicanceId = "C" + device.id.toString();
+              break;
+            case 7:
+              deviceCategory = "Lock";
+              applianceTypes=["SMARTLOCK"];
+              actions = ["getLockState", "setLockState"];
+              applicanceId = "L" + device.id.toString();
+              break;
             case 11:
               deviceCategory = "Generic IO";
               continue deviceLoop;
@@ -148,6 +161,10 @@ function handleDiscovery(event, context) {
               continue deviceLoop;
             case 17:
               deviceCategory = "Temperature Sensor";
+              deviceCategory = "Thermostat";
+              applicanceId = "T" + device.id.toString();
+              actions = ["getTemperatureReading"];
+              applianceTypes=["THERMOSTAT"];
               continue deviceLoop;
             case 18:
               deviceCategory = "Light Sensor";
@@ -187,14 +204,15 @@ function handleDiscovery(event, context) {
           }
           var applianceDiscovered2 = {
             applianceId: applicanceId,
-            manufacturerName:"vera",
+            manufacturerName:"MillieSoft",
             modelName:"vera scene",
             version: "1",
             friendlyName: scene.name + AppendToSceneName,
             friendlyDescription: scene.name + " Scene in " + roomName,
             isReachable: true,
             "actions":actions,
-            additionalApplianceDetails: {}
+            additionalApplianceDetails: {},
+            applianceTypes:["SCENE_TRIGGER"]
           };
           appliances.push(applianceDiscovered2);
         }
@@ -386,6 +404,77 @@ function handleControl(event, context) {
           }
         });
       });
+    } else if (event.header.name === 'GetTemperatureReadingRequest ') {
+        getCurrentTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
+          var currentTemperature = Number(currentTemperatureString);
+          if(isNaN(currentTemperature)){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
+          } else {
+			    var scaleName="CELSIUS";
+                if(scale === 'F'){
+				  currentTemperature = (currentTemperature - 32) / 1.8;
+			      scaleName="FAHRENHEIT";
+				}
+                var payloads = {temperatureReading: {value: currentTemperature,scale:scaleName}};
+
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
+    }else if (event.header.name === 'GetTargetTemperatureRequest ') {
+        getTargetTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
+          var targetTemperature = Number(currentTemperatureString);
+          if(isNaN(targetTemperature)){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get target temperature'));
+          } else {
+			    var scaleName="CELSIUS";
+                if(scale === 'F'){
+				  targetTemperature = (targetTemperature - 32) / 1.8;
+			      scaleName="FAHRENHEIT";
+				}
+                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
+    }else if (event.header.name === 'RetrieveCameraStreamUriRequest ') {
+        getCameraUri(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(streamingUrl){
+          if(streamingUrl==""){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get camera connection'));
+          } else {
+                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
+    } else if (event.header.name === 'GetLockStateRequest ') {
+        getLockState(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(lockState){
+          if(streamingUrl==""){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get lock state'));
+          } else {
+			  var lockStateStr="UNLOCKED";
+			  if(lockState){
+				  lockStateStr="LOCKED";
+			  }
+                var payloads = {lockState: lockStateStr};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
+    }else if (event.header.name === 'SetLockStateRequest ') {
+		var lockState="1";
+		if(event.payload.lockState.value=="UNLOCKED"){
+			lockState="0";
+		}
+        setLockState(ServerRelay,PK_Device,RelaySessionToken,applianceId,lockState,function(response){
+              if(response.indexOf("ERROR") === 0){
+                context.fail(generateControlError(responseType, 'TargetHardwareMalfunctionError', response));
+              } else {
+                var payloads = {lockState: lockState};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+              }
+        });
     } else {
       // error
     }
@@ -587,6 +676,30 @@ function setTemperature( ServerRelay,PK_Device,RelaySessionToken, deviceId,tempe
     cbfunc(response);
   });
 }
+
+function getCameraUri( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:micasaverde-com:serviceId:Camera1&Variable=VideoURLs',ServerRelay,RelaySessionToken,function(response){
+	  responseArray=response.split(":");
+	  if(responseArray.length>1){
+		  cbfunc(responseArray[1]);
+	  } else {
+        cbfunc(response);
+      }
+  });
+}
+
+function getLockState( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:micasaverde-com:serviceId:DoorLock1&Variable=Status',ServerRelay,RelaySessionToken,function(response){
+    cbfunc(response);
+  });
+}
+
+function setLockState( ServerRelay,PK_Device,RelaySessionToken, deviceId,state,cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId.substring(1)+'&serviceId=urn:micasaverde-com:serviceId:DoorLock1&SetTarget='+state,ServerRelay,RelaySessionToken,function(response){
+    cbfunc(response);
+  });
+}
+
 
 function runVeraCommand(path, ServerRelay,RelaySessionToken,cbfunc ){
   var keepAliveAgent = new https.Agent({ keepAlive: true });
