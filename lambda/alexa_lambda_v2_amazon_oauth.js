@@ -7,8 +7,8 @@
     or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 */
 
-var username = "{enter your username}";
-var password = "{enter your encoded password}";
+var username="{enter your username}";
+var password="{enter your encoded password}";
 var PK_Device = "";  // if you want to use a specific device, enter it's device ID here
 var scale = "C"; // change to F for fahrenheit support
 var AppendToSceneName = "";   // change to " Scene" to append ' Scene' to each scene name
@@ -404,64 +404,7 @@ function handleControl(event, context) {
           }
         });
       });
-    } else if (event.header.name === 'GetTemperatureReadingRequest ') {
-        getCurrentTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
-          var currentTemperature = Number(currentTemperatureString);
-          if(isNaN(currentTemperature)){
-            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
-          } else {
-			    var scaleName="CELSIUS";
-                if(scale === 'F'){
-				  currentTemperature = (currentTemperature - 32) / 1.8;
-			      scaleName="FAHRENHEIT";
-				}
-                var payloads = {temperatureReading: {value: currentTemperature,scale:scaleName}};
-
-                var result = {header: headers,payload: payloads};
-                context.succeed(result);
-          }
-        });
-    }else if (event.header.name === 'GetTargetTemperatureRequest ') {
-        getTargetTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
-          var targetTemperature = Number(currentTemperatureString);
-          if(isNaN(targetTemperature)){
-            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get target temperature'));
-          } else {
-			    var scaleName="CELSIUS";
-                if(scale === 'F'){
-				  targetTemperature = (targetTemperature - 32) / 1.8;
-			      scaleName="FAHRENHEIT";
-				}
-                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
-                var result = {header: headers,payload: payloads};
-                context.succeed(result);
-          }
-        });
-    }else if (event.header.name === 'RetrieveCameraStreamUriRequest ') {
-        getCameraUri(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(streamingUrl){
-          if(streamingUrl==""){
-            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get camera connection'));
-          } else {
-                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
-                var result = {header: headers,payload: payloads};
-                context.succeed(result);
-          }
-        });
-    } else if (event.header.name === 'GetLockStateRequest ') {
-        getLockState(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(lockState){
-          if(streamingUrl==""){
-            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get lock state'));
-          } else {
-			  var lockStateStr="UNLOCKED";
-			  if(lockState){
-				  lockStateStr="LOCKED";
-			  }
-                var payloads = {lockState: lockStateStr};
-                var result = {header: headers,payload: payloads};
-                context.succeed(result);
-          }
-        });
-    }else if (event.header.name === 'SetLockStateRequest ') {
+    } else if (event.header.name === 'SetLockStateRequest ') {
 		var lockState="1";
 		if(event.payload.lockState.value=="UNLOCKED"){
 			lockState="0";
@@ -489,7 +432,7 @@ function handleQuery(event, context) {
   var requestType = event.header.name;
   var responseType = event.header.name.replace("Request","Response");
   var headers = {
-    namespace: "Alexa.ConnectedHome.Control",
+    namespace: "Alexa.ConnectedHome.Query",
     name: responseType,
     payloadVersion: "2",
     messageId: generateUUID()
@@ -512,27 +455,57 @@ function handleQuery(event, context) {
           if(isNaN(currentTemperature)){
             context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
           } else {
-			var payloads = {temperatureReading: {value:currentTemperature},applianceResponseTimestamp: date.toISOString()};
-			var result = {header: headers,payload: payloads};
-			context.succeed(result);
+			    var scaleName="CELSIUS";
+                if(scale === 'F'){
+				  currentTemperature = (currentTemperature - 32) / 1.8;
+			      scaleName="FAHRENHEIT";
+				}
+                var payloads = {temperatureReading: {value: currentTemperature,scale:scaleName}};
 
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
           }
-      });
-
-    } else if (event.header.name === 'GetTargetTemperatureRequest') {
-      getTemperatureMode(ServerRelay, PK_Device, RelaySessionToken, applianceId, function(temperatureMode){
-        getTargetTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(targetTemperatureString){
-          var targetTemperature = Number(targetTemperatureString);
+        });
+    }else if (event.header.name === 'GetTargetTemperatureRequest') {
+        getTargetTemperature(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(currentTemperatureString){
+          var targetTemperature = Number(currentTemperatureString);
           if(isNaN(targetTemperature)){
-            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get current temperature'));
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get target temperature'));
           } else {
-			var payloads = {targetTemperature: {value:targetTemperature},temperatureMode:{value:temperatureMode.toUpperCase()},applianceResponseTimestamp: date.toISOString()};
-			var result = {header: headers,payload: payloads};
-			context.succeed(result);
-
+			    var scaleName="CELSIUS";
+                if(scale === 'F'){
+				  targetTemperature = (targetTemperature - 32) / 1.8;
+			      scaleName="FAHRENHEIT";
+				}
+                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
           }
-      });
-     });
+        });
+    } else if (event.header.name === 'RetrieveCameraStreamUriRequest ') {
+        getCameraUri(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(streamingUrl){
+          if(streamingUrl==""){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get camera connection'));
+          } else {
+                var payloads = {targetTemperature: {value: targetTemperature,scale:scaleName}};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
+    } else if (event.header.name === 'GetLockStateRequest ') {
+        getLockState(ServerRelay,PK_Device,RelaySessionToken,applianceId,function(lockState){
+          if(streamingUrl==""){
+            context.fail(generateControlError(responseType, 'TargetConnectivityUnstableError', 'Could not get lock state'));
+          } else {
+			  var lockStateStr="UNLOCKED";
+			  if(lockState){
+				  lockStateStr="LOCKED";
+			  }
+                var payloads = {lockState: lockStateStr};
+                var result = {header: headers,payload: payloads};
+                context.succeed(result);
+          }
+        });
     } else {
       // error
     }
