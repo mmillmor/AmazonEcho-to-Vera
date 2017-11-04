@@ -1,4 +1,4 @@
-# AmazonEcho-to-Vera for Amazon Smart Home V2
+# AmazonEcho-to-Vera for Amazon Smart Home V3
 
 
 Amazon Echo to Vera integration, Martin Millmore, [MillieSoft](http://www.millisoft.co.uk).
@@ -9,7 +9,7 @@ This code allows you to control your Vera home automation system using your Amaz
 
 Note, the Amazon Echo still requires OAuth2 to connect to the target device. Since the Vera does not support OAuth2, you need to set one a different OAuth2 server. Fortunatly you can use Login with Amazon as a dummy OAuth server and add your credentials in the code. This is simple to do and is free. 
 
-Instructions for setup are in SetupSteps.pdf
+V2 Instructions for setup are in SetupSteps.pdf. For V3, pick the V3 skill type, and pick Node 6.1
 
 ### Help!
 
