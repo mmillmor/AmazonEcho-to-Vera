@@ -44,6 +44,11 @@ exports.handler = function (request, context) {
             log("DEBUG:", "AdjustBrightness or SetBrightness Request", JSON.stringify(request));
             handleBrightnessControl(request, context);
         }
+    } else if (request.directive.header.namespace === 'Alexa.ColorTemperatureController') {
+        if (request.directive.header.name === 'SetColorTemperature') {
+            log("DEBUG:", "SetColorTemperature Request", JSON.stringify(request));
+            handleColorTemperatureControl(request, context);
+        }
     } else if (request.directive.header.namespace === 'Alexa.ThermostatController') {
         if (request.directive.header.name === 'AdjustTargetTemperature' || request.directive.header.name === 'SetTargetTemperature') {
             log("DEBUG:", "AdjustTargetTemperature or SetTargetTemperature Request", JSON.stringify(request));
@@ -87,7 +92,7 @@ function handleDiscovery(request, context) {
   var accessToken = request.directive.payload.scope.token.trim();
   var endpoints = [];
   getVeraSession(username,password,PK_Device,function (ServerRelay,RelaySessionToken,PK_Device){
-    getStatuses(ServerRelay,PK_Device,RelaySessionToken,function (statusText){
+    getUserData(ServerRelay,PK_Device,RelaySessionToken,function (statusText){
       var Status = parseJson(statusText,"status");
       var allDevices = Status.devices;
       var allRooms = Status.rooms;
@@ -111,8 +116,8 @@ function handleDiscovery(request, context) {
           if(devicesToIgnore.indexOf(endpointId) >= 0){
             continue deviceLoop;
           }
-          switch (device.category){
-            case 2:
+          switch (device.device_type){
+            case "urn:schemas-upnp-org:device:DimmableLight:1":
               deviceCategory = "Dimmable Switch";
               capabilities=[{"type":"AlexaInterface","interface":"Alexa.BrightnessController","version":"3","properties":{"supported":[{"name":"brightness"}]  ,"proactivelyReported": false,"retrievable": true}}
                            ,{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
@@ -120,7 +125,7 @@ function handleDiscovery(request, context) {
                            ];
               displayCategories=["LIGHT"];
               break;
-            case 3:
+            case "urn:schemas-upnp-org:device:BinaryLight:1":
               deviceCategory = "Switch";
               capabilities=[{"type": "AlexaInterface","interface": "Alexa.PowerController"   ,"version":"3","properties":{"supported":[{"name": "powerState"}]  ,"proactivelyReported": false,"retrievable": true}}
                          ,{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
@@ -132,10 +137,13 @@ function handleDiscovery(request, context) {
                 displayCategories=["SWITCH"];
 			  }
              break;
-            case 4:
+            case "urn:schemas-micasaverde-com:device:MotionSensor:1":
+            case "urn:schemas-micasaverde-com:device:DoorSensor:1":
+            case "urn:schemas-micasaverde-com:device:LightSensor:1":
+            case "urn:schemas-micasaverde-com:device:HumiditySensor:1":
               deviceCategory = "Sensor";
               continue deviceLoop;
-            case 5:
+            case "urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1":
               deviceCategory = "Thermostat";
               capabilities=[{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
                            ,{"type": "AlexaInterface","interface": "Alexa.ThermostatController","version": "3","properties": {"supported": [{"name": "targetSetpoint"},{"name": "thermostatMode"}],"proactivelyReported": false,"retrievable": true}}
@@ -143,7 +151,8 @@ function handleDiscovery(request, context) {
                            ];
               displayCategories=["THERMOSTAT"];
               break;
-            case 6:
+            case "urn:schemas-upnp-org:device:DigitalSecurityCamera:1":
+            case "urn:schemas-upnp-org:device:DigitalSecurityCamera:2":
             var camera=cameras.find(o => o.id === endpointId);
             if(camera){
               deviceCategory = "Camera";
@@ -157,7 +166,7 @@ function handleDiscovery(request, context) {
 		  } else {
             continue deviceLoop;
 		  }
-            case 7:
+            case "urn:schemas-micasaverde-com:device:DoorLock:1":
               deviceCategory = "Lock";
               displayCategories=["SMARTLOCK"];
               capabilities= [{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
@@ -167,20 +176,24 @@ function handleDiscovery(request, context) {
             case 11:
               deviceCategory = "Generic IO";
               continue deviceLoop;
-            case 16:
-              deviceCategory = "Humidity Sensor";
-              continue deviceLoop;
-            case 17:
-              deviceCategory = "Temperature Sensor";
+            case "urn:schemas-micasaverde-com:device:TemperatureSensor:1":
               deviceCategory = "Thermostat";
               capabilities=[{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
                            ,{"type": "AlexaInterface","interface": "Alexa.TemperatureSensor"   ,"version": "3","properties": {"supported": [{"name": "temperature"}],"proactivelyReported": false,"retrievable": true}}
                            ];
               displayCategories=["TEMPERATURE_SENSOR"];
               continue deviceLoop;
-            case 18:
-              deviceCategory = "Light Sensor";
-              continue deviceLoop;
+            case "urn:schemas-upnp-org:device:DimmableRGBLight:1":
+            case "urn:schemas-upnp-org:device:DimmableRGBLight:2":
+			deviceCategory = "RGB Switch";
+			capabilities=[{"type":"AlexaInterface","interface":"Alexa.BrightnessController","version":"3","properties":{"supported":[{"name":"brightness"}]  ,"proactivelyReported": false,"retrievable": true}}
+			             ,{"type": "AlexaInterface","interface": "Alexa.EndpointHealth"    ,"version":"3","properties":{"supported":[{"name": "connectivity"}],"proactivelyReported": false,"retrievable": true}}
+			             ,{"type": "AlexaInterface","interface": "Alexa.PowerController"   ,"version":"3","properties":{"supported":[{"name": "powerState"}]  ,"proactivelyReported": false,"retrievable": true}}
+			             ,{"type": "AlexaInterface","interface": "Alexa.ColorTemperatureController"   ,"version":"3","properties":{"supported":[{"name": "colorTemperatureInKelvin"}]  ,"proactivelyReported": false,"retrievable": true}}
+			             ];
+			displayCategories=["LIGHT"];
+			break;
+
             default:
               continue deviceLoop;
           }
@@ -196,7 +209,7 @@ function handleDiscovery(request, context) {
             manufacturerName:"MillieSoft",
             displayCategories:displayCategories,
             capabilities:capabilities
-          ,  cookie: {deviceId:device.id.toString(),deviceCategory:device.category.toString()}
+          ,  cookie: {deviceId:device.id.toString(),deviceCategory:device.device_type}
           };
           endpoints.push(applianceDiscovered);
         }
@@ -350,6 +363,47 @@ function handleBrightnessControl(request, context) {
 		  contextResult.properties[0].timeOfSample=new Date().toISOString();
           var response = {context: contextResult,event: {header: responseHeader},endpoint: request.directive.endpoint,payload: {}};
          log("DEBUG", "Alexa.BrightnessController ", JSON.stringify(response));
+         context.succeed(response);
+	    }
+	  });
+	}
+  });
+}
+
+function handleColorTemperatureControl(request, context) {
+  // get device ID passed in during discovery
+  var requestMethod = request.directive.header.name;
+  var powerResult;
+
+  getVeraSession(username,password,PK_Device,function(ServerRelay,RelaySessionToken,PK_Device){
+    var endpointId = request.directive.endpoint.endpointId;
+    var contextResult = {
+        "properties": [{
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "colorTemperatureInKelvin",
+            "uncertaintyInMilliseconds": 50
+        }]
+    };
+    var responseHeader = request.directive.header;
+    responseHeader.namespace="Alexa";
+    responseHeader.name = "Response";
+    responseHeader.messageId = responseHeader.messageId + "-R";
+
+    if (typeof endpointId !== "string" ) {
+      log("event payload is invalid",event);
+      context.fail(generateControlError(responseType, 'UNEXPECTED_INFORMATION_RECEIVED', 'Input is invalid'));
+    }
+
+    if (requestMethod === "SetColorTemperature") {
+	  var targetTemperatureLevel = request.directive.payload.colorTemperatureInKelvin;
+	  colorTemperatureDevice(ServerRelay,PK_Device,RelaySessionToken,endpointId,targetTemperatureLevel.toFixed(),function(veraResponse){
+	    if(veraResponse.indexOf("ERROR") === 0){
+		 context.fail(generateControlError3(request.directive, 'BRIDGE_UNREACHABLE', 'Could not set color temperature level'));
+	    } else {
+		  contextResult.properties[0].value=targetTemperatureLevel;
+		  contextResult.properties[0].timeOfSample=new Date().toISOString();
+          var response = {context: contextResult,event: {header: responseHeader},endpoint: request.directive.endpoint,payload: {}};
+         log("DEBUG", "Alexa.ColorTemperatureController ", JSON.stringify(response));
          context.succeed(response);
 	    }
 	  });
@@ -589,7 +643,10 @@ function reportState(request, context) {
         }
 	}
 
-        if(deviceCategory=="2"||deviceCategory=="3"){ //dimmer or switch
+        if(deviceCategory=="urn:schemas-upnp-org:device:DimmableLight:1"
+        ||deviceCategory=="urn:schemas-upnp-org:device:BinaryLight:1"
+        ||deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:1"
+        ||deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:2"){ //dimmer or switch
           var powerStatus=deviceStatuses.find(o => ( o.service === "urn:upnp-org:serviceId:SwitchPower1" && o.variable==="Status"));
           if(powerStatus){
 		  var powerStatusValue=powerStatus.value;
@@ -607,7 +664,9 @@ function reportState(request, context) {
           properties.push(property2);
 	  }
 	    }
-	    if(deviceCategory=="2"){ //dimmer
+	    if(deviceCategory=="urn:schemas-upnp-org:device:DimmableLight:1"
+	    ||deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:1"
+	    ||deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:2"){ //dimmer
 		  var levelStatus=deviceStatuses.find(o =>  o.variable==="LoadLevelStatus");
 		  if(levelStatus){
 			var levelStatusValue=parseInt(levelStatus.value);
@@ -621,7 +680,9 @@ function reportState(request, context) {
 		  properties.push(property3);
 	  }
 	    }
-	    if(deviceCategory=="5"||deviceCategory=="17"){ //thermostat or temperature sensor
+
+	    if(deviceCategory=="urn:schemas-micasaverde-com:device:TemperatureSensor:1"
+	    ||deviceCategory=="urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1"){ //thermostat or temperature sensor
 		  var temperatureStatus=deviceStatuses.find(o =>  o.variable==="CurrentTemperature");
 		  if(temperatureStatus){
 			var temperatureStatusValue=parseInt(temperatureStatus.value);
@@ -635,7 +696,7 @@ function reportState(request, context) {
 		  properties.push(property4);
 	  }
 	    }
-	    if(deviceCategory=="5"){ //thermostat
+	    if(deviceCategory=="urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1"){ //thermostat
 		  var temperatureSetpoint=deviceStatuses.find(o =>  o.variable==="CurrentSetpoint");
 		  if(temperatureSetpoint){
 			var temperatureSetpointValue=parseInt(temperatureSetpoint.value);
@@ -666,7 +727,7 @@ function reportState(request, context) {
 		  properties.push(property6);
 	  }
 	    }
-	    if(deviceCategory=="7"){ //lock
+	    if(deviceCategory=="urn:schemas-micasaverde-com:device:DoorLock:1"){ //lock
 		  var lockStatus=deviceStatuses.find(o =>  ( o.service === "urn:micasaverde-com:serviceId:DoorLock1" && o.variable==="Status"));
 		  if(lockStatus){
 			var lockStatusValue=lockStatus.value;
@@ -680,6 +741,22 @@ function reportState(request, context) {
 		  properties.push(property7);
 	  }
 		}
+		if(deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:1"
+			    ||deviceCategory=="urn:schemas-upnp-org:device:DimmableRGBLight:2"){ //RGB
+				  var colorStatus=deviceStatuses.find(o =>  o.variable==="CurrentColor");
+				  if(colorStatus){
+					var colorStatusValue=parseInt(colorStatus.value);
+					var property8={
+				    "namespace": "Alexa.ColorTemperatureController",
+				    "name": "colorTemperatureInKelvin",
+				    "value": colorStatusValue,
+					"timeOfSample":timeOfSample,
+				    "uncertaintyInMilliseconds": 50
+				  };
+				  properties.push(property8);
+			  }
+			    }
+
 
   var event = request.directive;
   event.header.name = "StateReport";
@@ -777,6 +854,12 @@ function getServerRelay( ServerDevice,PK_Device,SessionToken, cbfunc ){
   });
 }
 
+function getUserData( ServerRelay,PK_Device,RelaySessionToken, cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=user_data&ns=1',ServerRelay,RelaySessionToken,function(response){
+    cbfunc(response);
+  });
+}
+
 function getStatuses( ServerRelay,PK_Device,RelaySessionToken, cbfunc ){
   runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=sdata',ServerRelay,RelaySessionToken,function(response){
     cbfunc(response);
@@ -823,6 +906,12 @@ function dimDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,dimLevel,c
 
 function getCurrentDimLevel( ServerRelay,PK_Device,RelaySessionToken, deviceId,cbfunc ){
   runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=variableget&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Dimming1&Variable=LoadLevelTarget',ServerRelay,RelaySessionToken,function(response){
+    cbfunc(response);
+  });
+}
+
+function colorTemperatureDevice( ServerRelay,PK_Device,RelaySessionToken, deviceId,colorTemperatureInKelvin,cbfunc ){
+  runVeraCommand('/relay/relay/relay/device/'+PK_Device+'/port_3480/data_request?id=action&DeviceNum='+deviceId+'&serviceId=urn:upnp-org:serviceId:Color1&action=SetColorTemp&newColorTempTarget='+colorTemperatureInKelvin+'&output_format=json',ServerRelay,RelaySessionToken,function(response){
     cbfunc(response);
   });
 }
